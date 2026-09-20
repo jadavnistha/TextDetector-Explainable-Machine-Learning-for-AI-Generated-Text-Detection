@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}AI Text Detector{% endblock %}</title>
+    <style>
+        /* ── Reset & Base ─────────────────────────────────────── */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+            background: #1a1a2e;
+            color: #e0e0e0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.6;
+        }
+        a { color: #4a90d9; text-decoration: none; transition: color 0.2s; }
+        a:hover { color: #6cb0f6; }
+
+        /* ── Header / Navbar ──────────────────────────────────── */
+        .navbar {
+            background: #0f0f23;
+            border-bottom: 1px solid #2a2a4a;
+            padding: 0 40px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .nav-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 64px;
+        }
+        .nav-logo {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #f0f0f0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .nav-logo .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #4a90d9, #8b5cf6);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 8px;
+        }
+        .nav-links a {
+            color: #b0b0c8;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 0.93rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: #fff;
+            background: rgba(74, 144, 217, 0.15);
+        }
+        .nav-links a.active {
+            background: rgba(74, 144, 217, 0.25);
+        }
+        .nav-cta {
+            background: #4a90d9 !important;
+            color: #fff !important;
+        }
+        .nav-cta:hover { background: #3a7bc8 !important; }
+
+        /* Mobile hamburger */
+        .nav-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: #e0e0e0;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        /* ── Main Content ─────────────────────────────────────── */
+        .main-content {
+            flex: 1;
+        }
+        .container {
+            max-width: 1100px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* ── Section helpers ──────────────────────────────────── */
+        .section {
+            padding: 80px 20px;
+        }
+        .section-dark {
+            background: #16213e;
+        }
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #f0f0f0;
+            text-align: center;
+            margin-bottom: 12px;
+        }
+        .section-subtitle {
+            color: #888;
+            text-align: center;
+            max-width: 600px;
+            margin: 0 auto 40px;
+            font-size: 1rem;
+        }
+
+        /* ── Cards ────────────────────────────────────────────── */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 24px;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+        .card {
+            background: #1a1a2e;
+            border: 1px solid #2a2a4a;
+            border-radius: 12px;
+            padding: 28px 24px;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-4px);
+            border-color: #4a90d9;
+        }
+        .card-icon {
+            width: 48px;
+            height: 48px;
+            background: rgba(74, 144, 217, 0.15);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            margin-bottom: 16px;
+        }
+        .card h3 {
+            color: #f0f0f0;
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+        }
+        .card p {
+            color: #999;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        /* ── Buttons ──────────────────────────────────────────── */
+        .btn {
+            display: inline-block;
+            padding: 12px 28px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            text-align: center;
+        }
+        .btn-primary {
+            background: #4a90d9;
+            color: #fff;
+        }
+        .btn-primary:hover { background: #3a7bc8; color: #fff; }
+        .btn-outline {
+            background: transparent;
+            color: #4a90d9;
+            border: 2px solid #4a90d9;
+        }
+        .btn-outline:hover {
+            background: rgba(74, 144, 217, 0.1);
+            color: #6cb0f6;
+        }
+        .btn:disabled { background: #555; cursor: wait; }
+
+        /* ── Footer ───────────────────────────────────────────── */
+        .footer {
+            background: #0f0f23;
+            border-top: 1px solid #2a2a4a;
+            padding: 48px 20px 32px;
+        }
+        .footer-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 40px;
+        }
+        .footer-brand h3 {
+            color: #f0f0f0;
+            margin-bottom: 12px;
+            font-size: 1.15rem;
+        }
+        .footer-brand p {
+            color: #777;
+            font-size: 0.88rem;
+            line-height: 1.7;
+        }
+        .footer-links h4 {
+            color: #ccc;
+            margin-bottom: 14px;
+            font-size: 0.95rem;
+        }
+        .footer-links ul {
+            list-style: none;
+        }
+        .footer-links li {
+            margin-bottom: 8px;
+        }
+        .footer-links a {
+            color: #777;
+            font-size: 0.88rem;
+        }
+        .footer-links a:hover { color: #4a90d9; }
+        .footer-bottom {
+            max-width: 1100px;
+            margin: 32px auto 0;
+            padding-top: 24px;
+            border-top: 1px solid #1a1a2e;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.82rem;
+            color: #555;
+        }
+        .footer-tech span {
+            background: #1a1a2e;
+            padding: 4px 10px;
+            border-radius: 4px;
+            margin-left: 6px;
+            font-size: 0.78rem;
+            color: #888;
+        }
+
+        /* ── Responsive ───────────────────────────────────────── */
+        @media (max-width: 768px) {
+            .nav-toggle { display: block; }
+            .nav-links {
+                display: none;
+                position: absolute;
+                top: 64px;
+                left: 0;
+                right: 0;
+                background: #0f0f23;
+                flex-direction: column;
+                padding: 16px 20px;
+                border-bottom: 1px solid #2a2a4a;
+            }
+            .nav-links.open { display: flex; }
+            .footer-inner {
+                grid-template-columns: 1fr;
+                gap: 28px;
+            }
+            .footer-bottom {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+        }
+
+        /* ── Extra shared utilities ───────────────────────────── */
+        .text-gradient {
+            background: linear-gradient(135deg, #4a90d9, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .badge {
+            display: inline-block;
+            background: rgba(74, 144, 217, 0.15);
+            color: #4a90d9;
+            font-size: 0.82rem;
+            font-weight: 600;
+            padding: 4px 12px;
+            border-radius: 20px;
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+    <!-- ── Navbar ──────────────────────────────────────────────── -->
+    <nav class="navbar">
+        <div class="nav-inner">
+            <a href="/" class="nav-logo">
+                <span class="logo-icon">AI</span>
+                TextDetector
+            </a>
+            <button class="nav-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')">
+                &#9776;
+            </button>
+            <ul class="nav-links">
+                <li><a href="/" class="{% if active_page == 'home' %}active{% endif %}">Home</a></li>
+                <li><a href="/analyse" class="{% if active_page == 'analyse' %}active{% endif %}">Analyse</a></li>
+                <li><a href="/about" class="{% if active_page == 'about' %}active{% endif %}">About</a></li>
+                <li><a href="/contact" class="{% if active_page == 'contact' %}active{% endif %}">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- ── Main ────────────────────────────────────────────────── -->
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- ── Footer ──────────────────────────────────────────────── -->
+    <footer class="footer">
+        <div class="footer-inner">
+            <div class="footer-brand">
+                <h3>AI Text Detector</h3>
+                <p>
+                    A CPU-only machine learning project that detects AI-generated text
+                    using 32 handcrafted linguistic features and three classification models.
+                    Built for transparency and explainability.
+                </p>
+            </div>
+            <div class="footer-links">
+                <h4>Navigation</h4>
+                <ul>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/analyse">Analyse Text</a></li>
+                    <li><a href="/about">About</a></li>
+                    <li><a href="/contact">Contact</a></li>
+                </ul>
+            </div>
+            <div class="footer-links">
+                <h4>Technology</h4>
+                <ul>
+                    <li><a href="https://spacy.io" target="_blank">spaCy NLP</a></li>
+                    <li><a href="https://scikit-learn.org" target="_blank">scikit-learn</a></li>
+                    <li><a href="https://www.tensorflow.org" target="_blank">TensorFlow</a></li>
+                    <li><a href="https://shap.readthedocs.io" target="_blank">SHAP</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <span>&copy; 2026 AI Text Detector. Academic Research Project.</span>
+            <div class="footer-tech">
+                Built with
+                <span>Python</span>
+                <span>Flask</span>
+                <span>spaCy</span>
+                <span>scikit-learn</span>
+                <span>TensorFlow</span>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>

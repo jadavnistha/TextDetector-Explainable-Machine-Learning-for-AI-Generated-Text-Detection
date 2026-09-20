@@ -1,0 +1,286 @@
+{% extends "base.html" %}
+{% block title %}Analyse Text — AI Text Detector{% endblock %}
+
+{% block extra_css %}
+<style>
+    .analyse-page {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 50px 20px 80px;
+    }
+    .analyse-page h1 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #f0f0f0;
+        margin-bottom: 6px;
+    }
+    .analyse-page .subtitle {
+        color: #888;
+        margin-bottom: 28px;
+        font-size: 0.95rem;
+    }
+
+    /* Textarea */
+    textarea {
+        width: 100%;
+        height: 200px;
+        background: #16213e;
+        color: #e0e0e0;
+        border: 1px solid #2a2a4a;
+        border-radius: 8px;
+        padding: 14px;
+        font-size: 0.95rem;
+        resize: vertical;
+        font-family: inherit;
+        line-height: 1.6;
+    }
+    textarea:focus { outline: none; border-color: #4a90d9; }
+    textarea::placeholder { color: #555; }
+
+    .analyse-btn {
+        display: block;
+        width: 100%;
+        margin-top: 14px;
+        padding: 13px;
+    }
+
+    /* Results */
+    #results { margin-top: 30px; }
+
+    .verdict-box {
+        background: #16213e;
+        border: 1px solid #2a2a4a;
+        border-radius: 10px;
+        padding: 24px;
+        margin-bottom: 24px;
+    }
+    .verdict-label {
+        font-size: 1.3rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+    .verdict-ai   { color: #e74c3c; }
+    .verdict-human { color: #2ecc71; }
+
+    .bar-bg {
+        width: 100%;
+        height: 24px;
+        background: #2a2a4a;
+        border-radius: 12px;
+        overflow: hidden;
+        margin-top: 10px;
+    }
+    .bar-fill {
+        height: 100%;
+        border-radius: 12px;
+        transition: width 0.5s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #fff;
+    }
+
+    .results-section-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin: 24px 0 12px;
+        color: #ccc;
+    }
+
+    .sentence-block {
+        padding: 8px 12px;
+        margin: 4px 0;
+        border-radius: 6px;
+        line-height: 1.6;
+        font-size: 0.93rem;
+        cursor: default;
+        border-left: 3px solid transparent;
+        transition: border-color 0.2s;
+    }
+    .sentence-block:hover {
+        border-left-color: #4a90d9;
+    }
+
+    .features-list {
+        background: #16213e;
+        border: 1px solid #2a2a4a;
+        border-radius: 10px;
+        padding: 20px;
+        margin-top: 24px;
+    }
+    .features-list ul { list-style: none; }
+    .features-list li {
+        padding: 6px 0;
+        font-size: 0.9rem;
+        color: #bbb;
+        display: flex;
+        justify-content: space-between;
+        border-bottom: 1px solid #2a2a4a;
+    }
+    .features-list li:last-child { border-bottom: none; }
+    .features-list .fname { color: #4a90d9; font-weight: 600; }
+    .features-list .fval  { color: #888; font-size: 0.85rem; }
+    .fval.positive { color: #e74c3c; }
+    .fval.negative { color: #2ecc71; }
+
+    /* Spinner */
+    .spinner {
+        display: inline-block;
+        width: 18px; height: 18px;
+        border: 3px solid #555;
+        border-top-color: #fff;
+        border-radius: 50%;
+        animation: spin 0.6s linear infinite;
+        vertical-align: middle;
+        margin-right: 8px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Tips box */
+    .tips-box {
+        background: #16213e;
+        border: 1px solid #2a2a4a;
+        border-radius: 10px;
+        padding: 20px;
+        margin-top: 28px;
+    }
+    .tips-box h3 {
+        color: #ccc;
+        font-size: 0.95rem;
+        margin-bottom: 10px;
+    }
+    .tips-box ul {
+        list-style: none;
+        padding: 0;
+    }
+    .tips-box li {
+        color: #777;
+        font-size: 0.88rem;
+        padding: 4px 0;
+        padding-left: 18px;
+        position: relative;
+    }
+    .tips-box li::before {
+        content: "\2022";
+        color: #4a90d9;
+        position: absolute;
+        left: 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="analyse-page">
+    <h1>Analyse Text</h1>
+    <p class="subtitle">Paste text below and click Analyse to check if it was written by AI or a human.</p>
+
+    <textarea id="inputText" placeholder="Paste your text here... (minimum a few sentences for best results)"></textarea>
+    <button class="btn btn-primary analyse-btn" id="analyseBtn" onclick="analyse()">Analyse</button>
+
+    <div id="results"></div>
+
+    <div class="tips-box" id="tipsBox">
+        <h3>Tips for Best Results</h3>
+        <ul>
+            <li>Paste at least 3-5 sentences for a reliable prediction</li>
+            <li>The model works best on English prose (articles, essays, emails)</li>
+            <li>Very short sentences (under 5 words) are skipped in per-sentence analysis</li>
+            <li>The confidence score reflects the Calibrated Random Forest's probability</li>
+            <li>Hover over each sentence to see its individual AI probability</li>
+        </ul>
+    </div>
+</div>
+
+<script>
+async function analyse() {
+    const text = document.getElementById("inputText").value.trim();
+    if (!text) return alert("Please paste some text first.");
+
+    const btn = document.getElementById("analyseBtn");
+    const resultsDiv = document.getElementById("results");
+    const tipsBox = document.getElementById("tipsBox");
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Analysing...';
+    resultsDiv.innerHTML = "";
+
+    try {
+        const resp = await fetch("/analyse", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({text}),
+        });
+        const data = await resp.json();
+        tipsBox.style.display = "none";
+        renderResults(data);
+    } catch (err) {
+        resultsDiv.innerHTML = `<p style="color:#e74c3c;">Error: ${err.message}</p>`;
+    } finally {
+        btn.disabled = false;
+        btn.textContent = "Analyse";
+    }
+}
+
+function renderResults(data) {
+    const div = document.getElementById("results");
+    const isAI = data.document.label === "AI-Generated";
+    const conf = data.document.confidence;
+    const barColor = isAI ? "#e74c3c" : "#2ecc71";
+    const verdictClass = isAI ? "verdict-ai" : "verdict-human";
+
+    let html = `
+        <div class="verdict-box">
+            <div class="verdict-label ${verdictClass}">
+                ${data.document.label} &mdash; ${conf}% confidence
+            </div>
+            <div class="bar-bg">
+                <div class="bar-fill" style="width:${conf}%; background:${barColor};">
+                    ${conf}%
+                </div>
+            </div>
+        </div>
+
+        <div class="results-section-title">Sentence-by-Sentence Breakdown</div>
+    `;
+
+    for (const s of data.sentences) {
+        let bg, tooltip;
+        if (s.probability === null) {
+            bg = "rgba(255,255,255,0.03)";
+            tooltip = "Too short to score";
+        } else {
+            const r = Math.round(s.probability * 220);
+            const g = Math.round((1 - s.probability) * 180);
+            bg = `rgba(${r}, ${g}, 60, 0.2)`;
+            tooltip = `AI probability: ${(s.probability * 100).toFixed(1)}%`;
+        }
+        html += `<div class="sentence-block" style="background:${bg};" title="${tooltip}">
+                    ${escapeHtml(s.sentence)}
+                 </div>`;
+    }
+
+    html += `
+        <div class="features-list">
+            <div class="results-section-title" style="margin-top:0;">Top 5 Influential Features</div>
+            <ul>`;
+    for (const [fname, fval] of data.document.top_features) {
+        const direction = fval > 0 ? "toward AI" : "toward Human";
+        const cls = fval > 0 ? "positive" : "negative";
+        html += `<li>
+                    <span class="fname">${fname}</span>
+                    <span class="fval ${cls}">${fval > 0 ? "+" : ""}${fval.toFixed(4)} (${direction})</span>
+                 </li>`;
+    }
+    html += `</ul></div>`;
+
+    div.innerHTML = html;
+}
+
+function escapeHtml(s) {
+    const d = document.createElement("div");
+    d.textContent = s;
+    return d.innerHTML;
+}
+</script>
+{% endblock %}
