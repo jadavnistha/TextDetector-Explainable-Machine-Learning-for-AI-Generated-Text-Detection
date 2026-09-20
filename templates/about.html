@@ -1,0 +1,377 @@
+{% extends "base.html" %}
+{% block title %}About — TextGuard{% endblock %}
+
+{% block extra_css %}
+<style>
+    .about-hero {
+        text-align: center;
+        padding: 70px 20px 50px;
+        background: linear-gradient(180deg, #1A0A15 0%, #24101F 100%);
+    }
+    .about-hero h1 {
+        font-size: 2.2rem;
+        font-weight: 800;
+        color: #FFFFFF;
+        margin-bottom: 12px;
+    }
+    .about-hero p {
+        color: #FBCFE8;
+        max-width: 600px;
+        margin: 0 auto;
+        font-size: 1.05rem;
+        line-height: 1.7;
+    }
+
+    /* Methodology */
+    .methodology {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    .methodology h2 {
+        color: #FFFFFF;
+        font-size: 1.4rem;
+        margin-bottom: 16px;
+        padding-bottom: 8px;
+        border-bottom: 2px solid #EC4899;
+        display: inline-block;
+    }
+    .methodology p {
+        color: #FBCFE8;
+        font-size: 0.95rem;
+        line-height: 1.8;
+        margin-bottom: 16px;
+    }
+
+    /* Pipeline diagram */
+    .pipeline {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        margin: 36px 0;
+        flex-wrap: wrap;
+    }
+    .pipeline-step {
+        background: #3A162F;
+        border: 1px solid #4A1D3D;
+        border-radius: 8px;
+        padding: 14px 20px;
+        text-align: center;
+        min-width: 140px;
+    }
+    .pipeline-step strong {
+        display: block;
+        color: #EC4899;
+        font-size: 0.85rem;
+        margin-bottom: 4px;
+    }
+    .pipeline-step span {
+        font-size: 0.82rem;
+        color: #FBCFE8;
+    }
+    .pipeline-arrow {
+        color: #EC4899;
+        font-size: 1.4rem;
+    }
+
+    /* Feature categories table */
+    .feature-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0 36px;
+    }
+    .feature-table th,
+    .feature-table td {
+        text-align: left;
+        padding: 12px 16px;
+        border-bottom: 1px solid #4A1D3D;
+        font-size: 0.9rem;
+    }
+    .feature-table th {
+        color: #EC4899;
+        font-weight: 600;
+        background: #3A162F;
+    }
+    .feature-table td {
+        color: #FBCFE8;
+    }
+    .feature-table tr:hover td {
+        background: rgba(236, 72, 153, 0.05);
+    }
+    .feature-count {
+        background: rgba(236, 72, 153, 0.15);
+        color: #EC4899;
+        padding: 2px 10px;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 0.82rem;
+    }
+
+    /* Models comparison */
+    .model-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 20px;
+        margin: 24px 0 36px;
+    }
+    .model-card {
+        background: #3A162F;
+        border: 1px solid #4A1D3D;
+        border-radius: 10px;
+        padding: 24px;
+    }
+    .model-card h3 {
+        color: #FFFFFF;
+        font-size: 1.05rem;
+        margin-bottom: 6px;
+    }
+    .model-card .model-type {
+        font-size: 0.8rem;
+        color: #EC4899;
+        margin-bottom: 12px;
+        display: block;
+    }
+    .model-card p {
+        color: #FBCFE8;
+        font-size: 0.88rem;
+        line-height: 1.6;
+    }
+    .model-card.highlight {
+        border-color: #EC4899;
+        box-shadow: 0 0 20px rgba(236, 72, 153, 0.1);
+    }
+    .model-card.highlight::after {
+        content: "Our Improvement";
+        display: block;
+        margin-top: 12px;
+        font-size: 0.78rem;
+        color: #EC4899;
+        font-weight: 600;
+    }
+
+    /* Tech stack */
+    .tech-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+        margin: 24px 0;
+    }
+    .tech-item {
+        background: #3A162F;
+        border: 1px solid #4A1D3D;
+        border-radius: 8px;
+        padding: 16px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .tech-icon {
+        width: 40px;
+        height: 40px;
+        background: rgba(236, 72, 153, 0.12);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        flex-shrink: 0;
+    }
+    .tech-item strong {
+        display: block;
+        color: #FFFFFF;
+        font-size: 0.92rem;
+    }
+    .tech-item span {
+        color: #FBCFE8;
+        font-size: 0.82rem;
+    }
+
+    @media (max-width: 600px) {
+        .pipeline { flex-direction: column; }
+        .pipeline-arrow { transform: rotate(90deg); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Hero -->
+<section class="about-hero">
+    <span class="badge">About the Project</span>
+    <h1>How We Detect AI Text</h1>
+    <p>
+        An explainable, CPU-only approach to AI-generated text detection using
+        handcrafted linguistic features and calibrated machine learning models.
+    </p>
+</section>
+
+<!-- Methodology -->
+<section class="section">
+    <div class="methodology">
+        <h2>Methodology</h2>
+        <p>
+            Instead of using large transformer models that require GPUs and act as black boxes,
+            this project takes a different approach. We extract 32 interpretable linguistic features
+            from each text using spaCy and textdescriptives, then classify using traditional
+            machine learning models.
+        </p>
+        <p>
+            This makes every prediction explainable — you can see exactly which features
+            (readability, sentence structure, vocabulary patterns) contributed to the decision.
+        </p>
+
+        <div class="pipeline">
+            <div class="pipeline-step">
+                <strong>Input</strong>
+                <span>Raw text</span>
+            </div>
+            <span class="pipeline-arrow">&rarr;</span>
+            <div class="pipeline-step">
+                <strong>spaCy NLP</strong>
+                <span>Tokenise & parse</span>
+            </div>
+            <span class="pipeline-arrow">&rarr;</span>
+            <div class="pipeline-step">
+                <strong>32 Features</strong>
+                <span>Extract & scale</span>
+            </div>
+            <span class="pipeline-arrow">&rarr;</span>
+            <div class="pipeline-step">
+                <strong>Classify</strong>
+                <span>Calibrated RF</span>
+            </div>
+            <span class="pipeline-arrow">&rarr;</span>
+            <div class="pipeline-step">
+                <strong>Explain</strong>
+                <span>SHAP values</span>
+            </div>
+        </div>
+
+        <h2>Feature Categories</h2>
+        <table class="feature-table">
+            <thead>
+                <tr>
+                    <th>Category</th>
+                    <th>Count</th>
+                    <th>Examples</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Readability</td>
+                    <td><span class="feature-count">5</span></td>
+                    <td>Flesch Reading Ease, Gunning Fog, Coleman-Liau Index</td>
+                </tr>
+                <tr>
+                    <td>Descriptive Stats</td>
+                    <td><span class="feature-count">5</span></td>
+                    <td>Mean/median/std sentence length, mean/std token length</td>
+                </tr>
+                <tr>
+                    <td>Counts</td>
+                    <td><span class="feature-count">2</span></td>
+                    <td>Total tokens, total sentences</td>
+                </tr>
+                <tr>
+                    <td>POS-Tag Ratios</td>
+                    <td><span class="feature-count">9</span></td>
+                    <td>NOUN, VERB, ADJ, ADV, PRON, ADP, DET, CCONJ, PUNCT</td>
+                </tr>
+                <tr>
+                    <td>Syntax</td>
+                    <td><span class="feature-count">3</span></td>
+                    <td>Mean/std dependency distance, mean parse tree depth</td>
+                </tr>
+                <tr>
+                    <td>Lexical Diversity</td>
+                    <td><span class="feature-count">3</span></td>
+                    <td>Type-token ratio, unique word ratio, hapax legomenon ratio</td>
+                </tr>
+                <tr>
+                    <td>Punctuation Rates</td>
+                    <td><span class="feature-count">5</span></td>
+                    <td>Comma, period, question mark, exclamation, semicolon</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>Models</h2>
+        <div class="model-cards">
+            <div class="model-card">
+                <h3>1-D CNN</h3>
+                <span class="model-type">TensorFlow / Keras</span>
+                <p>
+                    Convolutional neural network operating on the feature vector.
+                    Two Conv1D layers with batch normalisation, followed by dense layers
+                    with dropout regularisation.
+                </p>
+            </div>
+            <div class="model-card">
+                <h3>Random Forest</h3>
+                <span class="model-type">scikit-learn</span>
+                <p>
+                    Ensemble of 100 decision trees. Strong baseline with good accuracy,
+                    but predicted probabilities tend to be poorly calibrated
+                    (clustered near 0 and 1).
+                </p>
+            </div>
+            <div class="model-card highlight">
+                <h3>Calibrated Random Forest</h3>
+                <span class="model-type">scikit-learn + CalibratedClassifierCV</span>
+                <p>
+                    Same Random Forest wrapped in isotonic regression calibration (5-fold CV).
+                    Achieves similar accuracy but significantly lower log loss, meaning the
+                    confidence percentages are more trustworthy.
+                </p>
+            </div>
+        </div>
+
+        <h2>Technology Stack</h2>
+        <div class="tech-grid">
+            <div class="tech-item">
+                <div class="tech-icon">&#128013;</div>
+                <div>
+                    <strong>Python</strong>
+                    <span>Core language</span>
+                </div>
+            </div>
+            <div class="tech-item">
+                <div class="tech-icon">&#127760;</div>
+                <div>
+                    <strong>Flask</strong>
+                    <span>Web framework</span>
+                </div>
+            </div>
+            <div class="tech-item">
+                <div class="tech-icon">&#128300;</div>
+                <div>
+                    <strong>spaCy</strong>
+                    <span>NLP & feature extraction</span>
+                </div>
+            </div>
+            <div class="tech-item">
+                <div class="tech-icon">&#128202;</div>
+                <div>
+                    <strong>scikit-learn</strong>
+                    <span>RF & calibration</span>
+                </div>
+            </div>
+            <div class="tech-item">
+                <div class="tech-icon">&#9881;</div>
+                <div>
+                    <strong>TensorFlow</strong>
+                    <span>CNN model</span>
+                </div>
+            </div>
+            <div class="tech-item">
+                <div class="tech-icon">&#128161;</div>
+                <div>
+                    <strong>SHAP</strong>
+                    <span>Explainability</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
